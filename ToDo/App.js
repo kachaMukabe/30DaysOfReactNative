@@ -19,7 +19,9 @@ import {
   Body,
   Text,
   View,
-  CheckBox
+  CheckBox,
+  Card,
+  CardItem
 } from 'native-base';
 
 export default class App extends React.Component {
@@ -48,8 +50,9 @@ export default class App extends React.Component {
   }
 
   addItem(){
-    this.state.items.push(this.state.task)
-    Alert.alert(this.state.items.length)
+    let itemsList = this.state.items
+    itemsList.push(this.state.task)
+    this.setState({items: itemsList})
   }
 
   items = [
@@ -67,19 +70,7 @@ export default class App extends React.Component {
           </Body>
         </Header>
         <View style={{ flex: 1 }} padder>
-          <Modal transparent={false}
-          visible={this.state.modalVisible}
-          onDismiss={()=> this.addItem()}
-          onRequestClose={()=>{Alert.alert('closed')}}>
-            <View style={{ flex:1, justifyContent: 'center', alignItems: 'center'}}>
-              <TextInput style={{ width:100, margin: 10, height: 40, borderColor: 'gray', borderBottomWidth:1}}
-              value="Enter New Task" onChangeText={(text)=> this.setState({task: text})}/>
-              <TouchableHighlight onPress={()=> this.setModalVisible(!this.state.modalVisible)}>
-                <Text style={{color: 'blue'}}>Enter</Text>
-              </TouchableHighlight>
-            </View>
-          </Modal>
-          <List dataArray={lItems}
+          <List dataArray={this.state.items}
           renderRow={(item)=>
             <ListItem>
               <CheckBox />
@@ -92,6 +83,34 @@ export default class App extends React.Component {
           style={{ backgroundColor: '#5067FF' }}>
             <Icon name="add" />
           </Fab>
+          <Modal transparent={false}
+          visible={this.state.modalVisible}
+          onDismiss={()=> this.addItem()}
+          onRequestClose={()=>{Alert.alert('closed')}}>
+            {/* <View style={{ flex:1, justifyContent: 'center', alignItems: 'center'}}>
+              <TextInput style={{ width:100, margin: 10, height: 40, borderColor: 'gray', borderBottomWidth:1}}
+              value="Enter New Task" onChangeText={(text)=> this.setState({task: text})}/>
+              <TouchableHighlight onPress={()=> this.setModalVisible(!this.state.modalVisible)}>
+                <Text style={{color: 'blue'}}>Enter</Text>
+              </TouchableHighlight>
+            </View> */}
+            <View style={{ backgroundColor:'skyblue', flex:1, justifyContent: 'center'}}>
+            <Card >
+              <CardItem header>
+                <Text>New Task</Text>
+              </CardItem>
+              <CardItem bordered>
+                <Body>
+                  <Item regular>
+                    <Input placeholder="new" onChangeText={(text)=> this.setState({task: text})}/>
+                  </Item>
+                </Body>
+              </CardItem>
+              <CardItem footer bordered button onPress={()=>this.setModalVisible(!this.state.modalVisible)}>
+                <Text style={{color: 'blue'}}>Enter New Task</Text>
+              </CardItem>
+            </Card></View>
+          </Modal>
         </View>
       </Container>
     );
