@@ -50,9 +50,12 @@ export default class App extends React.Component {
   }
 
   addItem(){
-    let itemsList = this.state.items
-    itemsList.push(this.state.task)
-    this.setState({items: itemsList})
+    if(this.state.task != ''){
+      let itemsList = this.state.items
+      itemsList.push(this.state.task)
+      this.setState({items: itemsList})
+    }
+    
   }
 
   items = [
@@ -83,21 +86,17 @@ export default class App extends React.Component {
           style={{ backgroundColor: '#5067FF' }}>
             <Icon name="add" />
           </Fab>
-          <Modal transparent={false}
+          <Modal transparent={true}
           visible={this.state.modalVisible}
           onDismiss={()=> this.addItem()}
           onRequestClose={()=>{Alert.alert('closed')}}>
-            {/* <View style={{ flex:1, justifyContent: 'center', alignItems: 'center'}}>
-              <TextInput style={{ width:100, margin: 10, height: 40, borderColor: 'gray', borderBottomWidth:1}}
-              value="Enter New Task" onChangeText={(text)=> this.setState({task: text})}/>
-              <TouchableHighlight onPress={()=> this.setModalVisible(!this.state.modalVisible)}>
-                <Text style={{color: 'blue'}}>Enter</Text>
-              </TouchableHighlight>
-            </View> */}
-            <View style={{ backgroundColor:'skyblue', flex:1, justifyContent: 'center'}}>
+            <View style={{ backgroundColor:'rgba(52, 52, 52, 0.8)', flex:1, justifyContent: 'center'}}>
             <Card >
               <CardItem header>
                 <Text>New Task</Text>
+                <Right><Button transparent onPress={()=> this.setModalVisible(!this.state.modalVisible)}>
+                  <Icon name="md-close"/></Button>
+                </Right>
               </CardItem>
               <CardItem bordered>
                 <Body>
