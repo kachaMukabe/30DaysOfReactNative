@@ -16,9 +16,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 
-
-const PUSH_ENDPOINT = 'https://gsag-c9246.firebaseio.com/';
-
 async function registerForPushNotificatiosnAsync() {
   Alert.alert('started')
   const {status: existingStatus} = await Permissions.getAsync(
@@ -43,29 +40,8 @@ async function registerForPushNotificatiosnAsync() {
     },
     token: {
       value: token,
-    }, function(error) {
-      if (error) {
-        console.log(error.toString())
-      } else {
-        console.log("Data saved successfully!")
-      }
     }
   })
-  // return fetch(PUSH_ENDPOINT, {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     token: {
-  //       value: token,
-  //     },
-  //     user: {
-  //       username: 'kacha',
-  //     },
-  //   }),
-  // });
 
 }
 
@@ -73,13 +49,27 @@ export default class App extends React.Component {
   constructor(props){
     super(props)
     registerForPushNotificatiosnAsync()
+    this.state ={
+      notification: {},
+    }
   }
+
+  componentDidMount(){
+    registerForPushNotificatiosnAsync();
+
+    this._notificationSubscription = Notifications.addListener(this._handleNotification);
+  }
+
+  _handleNotification = (notification)=> {
+    this.setState({notification: notification});
+  };
+
   render() {
     return (
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-        <Text>Changes you make will automatically reload.</Text>
-        <Text>Shake your phone to open the developer menu.</Text>
+        <Text>Test App to recieve notifications</Text>
+        <Text>Origin: {this.state.notification.origin}</Text>
+        <Text>Data: {JSON.stringify(this.state.notification.data)}</Text>
       </View>
     );
   }
