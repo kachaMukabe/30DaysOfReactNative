@@ -52,6 +52,10 @@ export default class App extends React.Component {
     this.state ={
       notification: {},
     }
+    // TODO: Figure out how to get rid of the warning of time out
+    console.ignoredYellowBox = [
+      'Setting a timer'
+      ];
   }
 
   componentDidMount(){
