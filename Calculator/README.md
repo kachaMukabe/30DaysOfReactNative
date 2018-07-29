@@ -2,4 +2,4 @@
 
 Self Explanatory.
 
-![Alt text](/img/calc.gif)
+![Alt text](https://github.com/kachaMukabe/30DaysOfReactNative/blob/master/Calculator/img/calc.gif)
