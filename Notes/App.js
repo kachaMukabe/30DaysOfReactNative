@@ -1,21 +1,20 @@
 import React from 'react';
 import { StyleSheet, Alert, AsyncStorage, Modal} from 'react-native';
-import store from 'react-native-simple-store';
 import {
   Container,
-  Content,
   Header,
   Text,
   List,
   ListItem,
   Fab,
-  Left,
-  Right,
   Body,
   Icon,
   View,
   Card,
-  CardItem
+  CardItem,
+  Textarea,
+  Title,
+  Button
 } from 'native-base';
 
 export default class App extends React.Component {
@@ -23,34 +22,36 @@ export default class App extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      title: 'First',
-      note: 'Kkkkkkk',
-      notes: [],
-      newNote: '',
+      title: '',
+      note: '',
+      notes: {},
       modalVisible: false
-    }
-    this._storeData()
-    store.update('album', {
-      albumName: 'Blurry Face'
-    })
-    
+    } 
   }
 
   _storeData = async() => {
-    try {
-      await AsyncStorage.setItem(this.state.title, this.state.note)
-    } catch (error) {
-      console.log(error.toString())
+    if(this.state.title != '' && this.state.note != ''){
+      let notes = this.state.notes
+      notes[this.state.title] = this.state.note
+      this.setState({notes: notes})
+      try {
+        console.log( this.state.notes)
+        await AsyncStorage.setItem('notes',JSON.stringify(notes))
+      } catch (error) {
+        console.log(error.toString())
+      }
+      this._retrieveData()
     }
+    
     
   }
 
-  _retrieveData = async(note) =>{
+  _retrieveData = async() =>{
     try {
-      const value = await AsyncStorage.getItem(note).then((text)=>{return text})
+      const value = await AsyncStorage.getItem('notes')
       if(value != null){
-        //console.log(typeof(value))
-        const item = JSON.stringify(value)
+        console.log(value)
+        this.setState({notes: JSON.parse(value)})
         return value
       } else{
         return ''
@@ -60,46 +61,15 @@ export default class App extends React.Component {
     }
   }
 
-  getNote = (note) =>{
-    let no = '[]'
-    no = JSON.stringify(store.get('album')
-    .then((res) =>{
-      return res.albumName
-      }
-    ))
-    console.log(typeof(no))
-    
-    return no
-    // console.log(typeof(curNote))
-  }
-
-  _getAllNotes = async() =>{
-    try {
-      const value = await AsyncStorage.getAllKeys()
-      this.setState({notes: value})
-      let notes = []
-      value.forEach((item, index)=>{
-        //console.log(item+" "+index)
-        notes.push(item)
-      })
-      //console.log(notes)
-      if(value != null){
-        return notes
-      }
-    } catch (error) {
-      console.log(error.toString())
-    }
-  }
 
   render() {
-    console.log(this.state.notes)
     return (
       <Container>
         <Header>
-
+          <Body><Title>Notes</Title></Body>
         </Header>
         <View style={{flex:1}}>
-          <List dataArray={this.state.notes}
+          <List dataArray={Object.keys(this.state.notes)}
             renderRow={(item)=>
               <ListItem>
                 <View style={{flex:1}}>
@@ -107,8 +77,10 @@ export default class App extends React.Component {
                 <CardItem header>
                   <Text>{item}</Text>
                 </CardItem>
-                <CardItem cardBody>
-                  <Text>{this.getNote(item)}</Text>
+                <CardItem>
+                  <Body>
+                    <Text>{this.state.notes[item]}</Text>
+                  </Body>
                 </CardItem>
               </Card>
               </View>
@@ -116,10 +88,28 @@ export default class App extends React.Component {
             }
           />
           <Fab style={{ backgroundColor: '#5067FF' }}
-            onPress = {()=>{this._getAllNotes()}}
+            onPress = {()=>{this.setState({modalVisible: true})}}
             position="bottomRight">
             <Icon name="add" />
           </Fab>
+          <Modal visible={this.state.modalVisible}
+          onDismiss={this._storeData}>
+            <View style={styles.container}>
+              <Textarea rowSpan={1} bordered placeholder="Note title" 
+                onChangeText={(text)=>{this.setState({title: text})}}/>
+              <Textarea rowSpan={6} bordered placeholder="Enter new Note" onChangeText={(text)=>{this.setState({note: text})}}/>
+              <View style={styles.modalButton}>
+                <Button style={{ backgroundColor: '#5067FF' }} onPress={()=>this.setState({modalVisible: !this.state.modalVisible})}>
+                  <Text>Cancel</Text>
+                </Button>
+                <Text>  </Text>
+                <Button style={{ backgroundColor: '#5067FF' }} onPress={()=>this.setState({modalVisible: !this.state.modalVisible})}>
+                  <Text>Add Task</Text>
+                </Button>
+              </View>
+            </View>
+
+          </Modal>
         </View>
       </Container>
     );
@@ -130,7 +120,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center',
+  },
+  modalButton: {
+    padding: 10,
+    width: null,
+    height: 20,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
 });
