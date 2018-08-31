@@ -1,68 +1,81 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { StyleSheet } from 'react-native';
 import {Col, Row, Grid} from 'react-native-easy-grid';
 
 export default class App extends React.Component {
+  gridNum = 40;
 
   constructor(props){
-    super(props)
-    let board = new Array(20)
-    for (i = 0; i < 20; i++){
-      board[i] = new Array(20)
-    }
-    for(x=0; x< 20; x++){
-      for(y=0; y < 20; y++){
-        switch(Math.floor(Math.random() * 2)){
-          case 0:
-            board[x][y] = '#fff'
-            break;
-          case 1:
-            board[x][y] = '#00FFFF'
-            break;
-        }
-      }
-    }
-    this.state = {
-      board: board
-    }
-    setInterval(this.newBoard, 2000)
+    super(props);
     
+    this.state = {
+      board: []
+    }
+    setInterval(this.run, 1000);
+  }
+  componentDidMount(){
+    let board = this.setupBoard();
+    this.setState({board: board})
   }
 
-  newBoard =()=>{
-    let oldBoard = this.state.board
-    console.log(oldBoard)
-    let board = new Array(20)
-    for (i = 0; i < 20; i++){
-      board[i] = new Array(20)
+  setupBoard = () =>{
+    let board = new Array(this.gridNum);
+    for (i = 0; i < this.gridNum; i++){
+      board[i] = new Array(this.gridNum);
     }
-    for(x=0; x< 20; x++){
-      for(y=0; y < 20; y++){
-        neighbours = 0
-        for(i=-1; i< 1; i++){
-          for(j=-1; j < 1; j++){
-            switch(oldBoard[(x+i+20)%20][(y+j+20)%20]){
-              case '#fff':
-                neighbours += 0
-                break;
-              case '#00FFFF':
-                neighbours += 1
-                break;
-            }
+    for(x=0; x< this.gridNum; x++){
+      for(y=0; y < this.gridNum; y++){
+        board[x][y] = {
+          cell:Math.floor(Math.random()*2), 
+          n:0
+        };
+      }
+    }
+    return board;
+  }
+
+  run = () => {
+    this.checkNeighbours();
+    this.newBoard();
+  }
+
+  checkNeighbours = () => {
+    let oldBoard = this.state.board
+    for(x=1; x< this.gridNum-1; x++){
+      for(y=1; y < this.gridNum-1; y++){
+        
+        for(i=-1; i< 2; i++){
+          for(j=-1; j < 2; j++){
+            oldBoard[x][y].n += oldBoard[(x+i)][(y+j)].cell
           }
         }
-        if(oldBoard[x][y] == '#00FFFF'){
-          neighbours -= 1
-        }
+        oldBoard[x][y].n -= oldBoard[x][y].cell
+      }
+    }
+    this.setState({board: oldBoard})
+  }
 
-        if((oldBoard[x][y] == '#00FFFF') && neighbours < 2){
-          board[x][y] = '#fff'
-        } else if((oldBoard[x][y] == '#00FFFF') && neighbours > 3){
-          board[x][y] = '#fff'
-        } else if((oldBoard[x][y] == '#fff') && neighbours == 3){
-          board[x][y] = '#00FFFF'
+  newBoard = () => {
+    let oldBoard = this.state.board
+    let board = this.setupBoard()
+    for(let a = 0; a < this.gridNum; a++){
+      for(let b=0; b<this.gridNum;b++){
+        board[a][b] = {cell:0, n:0}
+      }
+    }
+    for(x=1; x< this.gridNum-1; x++){
+      for(y=1; y < this.gridNum-1; y++){
+
+        if((oldBoard[x][y].cell == 1) && oldBoard[x][y].n < 2){
+          board[x][y].cell = 0
+        } else if((oldBoard[x][y].cell == 1) && oldBoard[x][y].n > 3){
+          board[x][y].cell = 0
+        } else if((oldBoard[x][y].cell == 0) && oldBoard[x][y].n == 3){
+          board[x][y].cell = 1
+        } else if((oldBoard[x][y].cell == 1)&& (oldBoard[x][y].n == 3 || oldBoard[x][y].n == 2)){
+          board[x][y].cell = 1
         } else{
-          board[x][y] = oldBoard[x][y]
+          board[x][y].cell = oldBoard[x][y].cell
         }
       }
     }
@@ -73,10 +86,10 @@ export default class App extends React.Component {
     if(this.state.board != null){
     }
     return (
-      <Grid style={styles.container}>
+      <Grid style={styles.container} >
         {this.state.board.map((row, key)=>{
           return <Col key={key}>{row.map((cell, key)=>{
-            return <Row style={{backgroundColor:cell, margin:1}} key={key}></Row>
+            return <Row style={{backgroundColor:cell.cell==1?'#00FFFF':'#FFF', margin:1}} key={key}></Row>
           })}</Col>
         })}
       </Grid>
@@ -87,6 +100,6 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 22,
+    marginTop:22,
   },
 });
